@@ -1,0 +1,38 @@
+# Environment & API Keys (DO NOT COMMIT)
+.env
+.env.local
+.env.*.local
+
+# Python Virtual Environment
+venv/
+env/
+ENV/
+*.venv/
+lib/
+bin/
+include/
+
+# Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Local databases and runtime data
+data/*.db
+data/*.db-journal
+data/*.sqlite3
+
+# Uploaded study PDFs
+uploads/*
+!uploads/.gitkeep
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

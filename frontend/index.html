@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Assistant | Smart Notes, Summaries & Quizzes</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+                    <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                        <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-900 via-brand-800 to-indigo-900 bg-clip-text text-transparent">AI Study Assistant</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                            Gemini 3.8 Flash Active
+                        </span>
+                        <span id="mongoDbStatusBadge" class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200" title="Connected to MongoDB Atlas: cluster0.r2wn6ka.mongodb.net (Database: study_assistant)">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span>
+                            MongoDB Atlas Connected
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 font-medium">Smart Notes • Document Chat • Instant Quizzes</p>
+                </div>
+            </div>
+
+            <!-- Active Document Quick Selector -->
+            <div class="hidden md:flex items-center space-x-2 bg-slate-100/80 p-1.5 rounded-xl border border-slate-200">
+                <span class="text-xs font-semibold text-slate-500 pl-2 flex items-center">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1 text-brand-600"></i> Active Doc:
+                </span>
+                <select id="activeDocSelect" onchange="app.switchActiveDocument(this.value)" class="bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 py-1 px-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500 max-w-[240px] truncate shadow-xs">
+                    <option value="">No document selected</option>
+                </select>
+                <button onclick="app.loadSampleNotes()" title="Load Sample AI Study Notes" class="px-2.5 py-1 text-xs font-medium text-brand-700 hover:text-brand-800 hover:bg-brand-50 rounded-lg transition-colors flex items-center">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1"></i> Sample Doc
+                </button>
+            </div>
+
+            <!-- User and Settings Actions -->
+            <div class="flex items-center space-x-2">
+                <button onclick="app.openSettingsModal()" class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors" title="AI Settings & API Keys">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+                <div id="authActions">
+                    <!-- Dynamic Auth View (Logged in vs Logged out) -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <div class="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6">
+
+        <!-- Navigation Sidebar -->
+        <aside class="w-60 flex-shrink-0 hidden lg:block">
+            <nav class="space-y-1.5 sticky top-24">
+                <button onclick="app.navigate('dashboard')" id="nav-dashboard" class="nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-150 text-brand-700 bg-brand-50 border border-brand-200">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Dashboard</span>
+                </button>
+
+                <button onclick="app.navigate('documents')" id="nav-documents" class="nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="files" class="w-4 h-4"></i>
+                    <span>Documents & Upload</span>
+                    <span id="sidebarDocBadge" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-semibold">0</span>
+                </button>
+
+                <button onclick="app.navigate('summary')" id="nav-summary" class="nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="book-open-check" class="w-4 h-4"></i>
+                    <span>AI Summarizer</span>
+                </button>
+
+                <button onclick="app.navigate('chat')" id="nav-chat" class="nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="messages-square" class="w-4 h-4"></i>
+                    <span>Study Chatbot</span>
+                </button>
+
+                <button onclick="app.navigate('quiz')" id="nav-quiz" class="nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                    <span>Convert PDF to Quiz</span>
+                </button>
+
+                <button onclick="app.navigate('notes')" id="nav-notes" class="nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                    <i data-lucide="notebook-pen" class="w-4 h-4"></i>
+                    <span>Revision Notes</span>
+                </button>
+
+                <div class="pt-6 border-t border-slate-200 mt-6">
+                    <!-- Current Active Document Card in Sidebar -->
+                    <div id="sidebarActiveDocCard" class="p-3 bg-gradient-to-br from-brand-50 to-indigo-50 border border-brand-100 rounded-xl">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-brand-600 mb-1 flex items-center">
+                            <i data-lucide="zap" class="w-3 h-3 mr-1"></i> Currently Studying
+                        </div>
+                        <div id="sidebarActiveDocTitle" class="text-xs font-bold text-slate-800 truncate mb-1">
+                            No document active
+                        </div>
+                        <div id="sidebarActiveDocMeta" class="text-[11px] text-slate-500">
+                            Upload or select a PDF to begin.
+                    </div>
+
+                    <!-- Sidebar User Account / Auth Card -->
+                    <div id="sidebarUserCard" class="mt-3 p-3 bg-white border border-slate-200 rounded-xl shadow-2xs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 min-w-0">
+
+            <!-- Mobile Navigation Bar -->
+            <div class="lg:hidden flex overflow-x-auto space-x-2 pb-3 mb-4 border-b border-slate-200">
+                <button onclick="app.navigate('dashboard')" class="mobile-tab px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-brand-50 text-brand-700">Dashboard</button>
+                <button onclick="app.navigate('documents')" class="mobile-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-600 hover:bg-slate-100">Documents</button>
+                <button onclick="app.navigate('summary')" class="mobile-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-600 hover:bg-slate-100">Summarizer</button>
+                <button onclick="app.navigate('chat')" class="mobile-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-600 hover:bg-slate-100">Chat</button>
+                <button onclick="app.navigate('quiz')" class="mobile-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-600 hover:bg-slate-100">Quiz</button>
+                <button onclick="app.navigate('notes')" class="mobile-tab px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap text-slate-600 hover:bg-slate-100">Notes</button>
+            </div>
+
+            <!-- VIEW 1: DASHBOARD -->
+            <section id="view-dashboard" class="space-y-6">
+                <!-- Welcome Banner -->
+                <div class="p-6 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-indigo-800 text-white shadow-lg relative overflow-hidden">
+                    <div class="relative z-10 max-w-2xl">
+                        <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 backdrop-blur-md mb-3">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-amber-300"></i> AI Study Acceleration Hub
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Welcome back, <span id="dashUsername">Student</span>! 🚀</h1>
+                        <p class="text-brand-100 text-sm leading-relaxed mb-4">
+                            Upload lecture slides, textbook chapters, or exam notes. Your AI Study Assistant extracts key concepts, generates quizzes, and answers your questions with page-accurate citations.
+                        </p>
+                        <div class="flex flex-wrap gap-2.5">
+                            <button onclick="app.navigate('documents')" class="px-4 py-2 bg-white text-brand-700 font-bold rounded-xl text-xs hover:bg-brand-50 transition-all shadow-sm flex items-center">
+                                <i data-lucide="upload" class="w-4 h-4 mr-1.5"></i> Upload PDF Notes
+                            </button>
+                            <button onclick="app.loadSampleNotes()" class="px-4 py-2 bg-brand-500/30 hover:bg-brand-500/50 text-white font-medium rounded-xl text-xs transition-all border border-white/20 flex items-center">
+                                <i data-lucide="play" class="w-4 h-4 mr-1.5"></i> Quick Start with Sample Notes
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Decorative background circles -->
+                    <div class="absolute -right-8 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                </div>
+
+                <!-- Metrics Overview Cards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between text-slate-500 mb-2">
+                            <span class="text-xs font-semibold">Documents</span>
+                            <div class="p-1.5 rounded-lg bg-blue-50 text-blue-600"><i data-lucide="files" class="w-4 h-4"></i></div>
+                        </div>
+                        <div id="statDocsCount" class="text-2xl font-extrabold text-slate-900">0</div>
+                        <div class="text-[11px] text-slate-500 mt-1">Uploaded PDF materials</div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between text-slate-500 mb-2">
+                            <span class="text-xs font-semibold">Revision Notes</span>
+                            <div class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600"><i data-lucide="bookmark" class="w-4 h-4"></i></div>
+                        </div>
+                        <div id="statNotesCount" class="text-2xl font-extrabold text-slate-900">0</div>
+                        <div class="text-[11px] text-slate-500 mt-1">Summaries & chapters saved</div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between text-slate-500 mb-2">
+                            <span class="text-xs font-semibold">Quizzes Taken</span>
+                            <div class="p-1.5 rounded-lg bg-purple-50 text-purple-600"><i data-lucide="brain-circuit" class="w-4 h-4"></i></div>
+                        </div>
+                        <div id="statQuizzesCount" class="text-2xl font-extrabold text-slate-900">0</div>
+                        <div class="text-[11px] text-slate-500 mt-1">Practice sessions</div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between text-slate-500 mb-2">
+                            <span class="text-xs font-semibold">Average Score</span>
+                            <div class="p-1.5 rounded-lg bg-amber-50 text-amber-600"><i data-lucide="trophy" class="w-4 h-4"></i></div>
+                        </div>
+                        <div id="statAvgScore" class="text-2xl font-extrabold text-slate-900">0%</div>
+                        <div class="text-[11px] text-slate-500 mt-1">Overall mastery rating</div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Tools Grid -->
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 mb-3 flex items-center">
+                        <i data-lucide="compass" class="w-4 h-4 mr-2 text-brand-600"></i> What would you like to study today?
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div onclick="app.quickAction('summary')" class="bg-white p-5 rounded-xl border border-slate-200 hover:border-brand-300 hover:shadow-md transition-all cursor-pointer group">
+                            <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 mb-1">Summarize Notes</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-3">Generate bullet-point takeaways, definitions, and chapter-by-chapter cheat sheets.</p>
+                            <span class="text-xs font-semibold text-brand-600 flex items-center group-hover:translate-x-1 transition-transform">
+                                Launch Summarizer <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                            </span>
+                        </div>
+
+                        <div onclick="app.quickAction('chat')" class="bg-white p-5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group">
+                            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="bot" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 mb-1">Ask Study Chatbot</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-3">Ask complex questions about your documents and get answers with exact page references.</p>
+                            <span class="text-xs font-semibold text-indigo-600 flex items-center group-hover:translate-x-1 transition-transform">
+                                Open Chatbot <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                            </span>
+                        </div>
+
+                        <div onclick="app.quickAction('quiz')" class="bg-white p-5 rounded-xl border border-slate-200 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer group">
+                            <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="brain" class="w-5 h-5"></i>
+                            </div>
+                            <h3 class="font-bold text-slate-900 mb-1">Convert PDF into Quiz</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-3">Transform any uploaded PDF into interactive exam MCQs, True/False, or 3D flashcards with instant grading.</p>
+                            <span class="text-xs font-semibold text-purple-600 flex items-center group-hover:translate-x-1 transition-transform">
+                                Convert PDF into Quiz <i data-lucide="arrow-right" class="w-3.5 h-3.5 ml-1"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Documents Section -->
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center">
+                            <i data-lucide="folder-clock" class="w-4 h-4 mr-2 text-brand-600"></i> Recent Study Materials
+                        </h2>
+                        <button onclick="app.navigate('documents')" class="text-xs font-semibold text-brand-600 hover:text-brand-800">
+                            View All Materials
+                        </button>
+                    </div>
+                    <div id="dashRecentDocsList" class="divide-y divide-slate-100">
+                        <div class="py-8 text-center text-slate-400 text-xs">
+                            Loading your documents...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: DOCUMENTS & UPLOAD -->
+            <section id="view-documents" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">Study Materials Library</h1>
+                        <p class="text-xs text-slate-500">Upload your PDF textbooks, lecture slides, and notes.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="app.loadSampleNotes()" class="px-3.5 py-2 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 hover:bg-brand-100 rounded-xl transition-all flex items-center">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5"></i> Add Sample AI Lecture Notes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Drag-and-Drop Area -->
+                <div id="dropzone" class="border-2 border-dashed border-slate-300 hover:border-brand-500 bg-white rounded-2xl p-8 text-center transition-all cursor-pointer relative group">
+                    <input type="file" id="pdfFileInput" accept=".pdf" class="hidden" onchange="app.handleFileSelect(event)">
+                    
+                    <div class="max-w-md mx-auto">
+                        <div class="w-14 h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-up" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-1">Click to upload or drag & drop PDF</h3>
+                        <p class="text-xs text-slate-500 mb-3">Standard PDF documents supported up to 25MB.</p>
+                        
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="inline-flex items-center text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                                <i data-lucide="check" class="w-3 h-3 mr-1 text-emerald-500"></i> Text Extraction
+                            </span>
+                            <span class="inline-flex items-center text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                                <i data-lucide="check" class="w-3 h-3 mr-1 text-emerald-500"></i> Page Chunking
+                            </span>
+                            <span class="inline-flex items-center text-[11px] font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                                <i data-lucide="check" class="w-3 h-3 mr-1 text-emerald-500"></i> Instant RAG
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Uploading Progress overlay -->
+                    <div id="uploadProgressContainer" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center p-6 z-10">
+                        <div class="w-10 h-10 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mb-3"></div>
+                        <p id="uploadStatusText" class="text-xs font-bold text-slate-800">Processing and extracting text from PDF...</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Analyzing pages and calculating word frequency</p>
+                    </div>
+                </div>
+
+                <!-- Document List -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Your Documents</span>
+                        <span id="docCountBadge" class="text-xs text-slate-500">0 documents</span>
+                    </div>
+                    <div id="docLibraryList" class="divide-y divide-slate-100">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: AI SUMMARIZER & REVISION NOTES -->
+            <section id="view-summary" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">AI Notes Summarizer</h1>
+                        <p class="text-xs text-slate-500">Transform dense chapters into structured revision notes, bullet takeaways, and glossary lists.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="app.copySummaryToClipboard()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all flex items-center">
+                            <i data-lucide="copy" class="w-3.5 h-3.5 mr-1.5"></i> Copy
+                        </button>
+                        <button onclick="app.saveCurrentSummaryAsNote()" class="px-3.5 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl transition-all flex items-center">
+                            <i data-lucide="bookmark-plus" class="w-3.5 h-3.5 mr-1.5"></i> Save to Revision Notes
+                        </button>
+                        <button onclick="window.print()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all flex items-center">
+                            <i data-lucide="printer" class="w-3.5 h-3.5 mr-1.5"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summarizer Configuration Panel -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Length selector -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Summary Length</label>
+                            <select id="summaryLengthSelect" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 p-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                <option value="short">⚡ Quick Takeaways (Executive)</option>
+                                <option value="medium" selected>📖 Core Study Summary (Balanced)</option>
+                                <option value="detailed">📚 Comprehensive Guide (Chapter & Page Breakdown)</option>
+                            </select>
+                        </div>
+
+                        <!-- Format style selector -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">Format Style</label>
+                            <select id="summaryFormatSelect" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 p-2.5 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                                <option value="standard" selected>📑 Structured Notes (Themes & Terms)</option>
+                                <option value="bullets">📝 Bullet-Point Quick Revision</option>
+                            </select>
+                        </div>
+
+                        <!-- Action trigger -->
+                        <div class="flex items-end">
+                            <button onclick="app.generateSummary(true)" id="btnGenerateSummary" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition-all shadow-xs flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-4 h-4 mr-1.5"></i> Generate AI Summary
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rendered Summary Area -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-6 min-h-[360px] relative printable-content">
+                    <div id="summaryLoadingSpinner" class="hidden absolute inset-0 bg-white/95 backdrop-blur-xs rounded-xl flex flex-col items-center justify-center z-10">
+                        <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin mb-3"></div>
+                        <p class="text-sm font-bold text-slate-800">Generating Study Guide with Gemini 3.8 Flash...</p>
+                        <p class="text-xs text-slate-500 mt-1">Synthesizing modules, theorems, formulas, and exam problem types</p>
+                    </div>
+
+                    <div id="summaryContent" class="markdown-body">
+                        <!-- Populated by JS -->
+                        <div class="text-center py-16 text-slate-400">
+                            <i data-lucide="book-open" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
+                            <p class="text-sm font-semibold text-slate-600">No summary generated yet</p>
+                            <p class="text-xs text-slate-400 mt-1">Select your preferred length and format above, then click 'Generate AI Summary'.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 4: AI STUDY CHATBOT -->
+            <section id="view-chat" class="space-y-4 hidden flex flex-col h-[calc(100vh-140px)]">
+                <!-- Chat Header -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                            <i data-lucide="bot" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h2 class="text-sm font-bold text-slate-900">Study Document Tutor</h2>
+                                <span id="chatDocTitlePill" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                    No doc selected
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Ask any question. Answers are grounded with citations.</p>
+                        </div>
+                    </div>
+                    <button onclick="app.clearChatHistory()" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i> Clear Chat
+                    </button>
+                </div>
+
+                <!-- Suggested Starters -->
+                <div class="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
+                    <span class="text-slate-400 font-semibold whitespace-nowrap pl-1">Ask:</span>
+                    <button onclick="app.askSuggested('What are the core definitions and principles in this document?')" class="px-2.5 py-1 bg-white border border-slate-200 hover:border-brand-400 text-slate-600 hover:text-brand-700 rounded-full whitespace-nowrap transition-colors">
+                        "What are the core definitions?"
+                    </button>
+                    <button onclick="app.askSuggested('Explain the main concepts mentioned on page 2 in detail.')" class="px-2.5 py-1 bg-white border border-slate-200 hover:border-brand-400 text-slate-600 hover:text-brand-700 rounded-full whitespace-nowrap transition-colors">
+                        "Explain concepts on page 2"
+                    </button>
+                    <button onclick="app.askSuggested('What are the most likely questions for an exam based on these notes?')" class="px-2.5 py-1 bg-white border border-slate-200 hover:border-brand-400 text-slate-600 hover:text-brand-700 rounded-full whitespace-nowrap transition-colors">
+                        "Exam questions from notes"
+                    </button>
+                </div>
+
+                <!-- Chat Messages Stream -->
+                <div id="chatMessagesStream" class="flex-1 bg-white rounded-xl border border-slate-200 p-4 overflow-y-auto space-y-4 shadow-xs">
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs">
+                        <div class="font-bold text-slate-800 mb-1 flex items-center">
+                            <i data-lucide="info" class="w-4 h-4 mr-1.5 text-brand-600"></i> AI Study Assistant Ready
+                        </div>
+                        Ask questions about formulas, definitions, algorithms, or theories present in your notes. The AI will look up relevant passages and cite the exact page number!
+                    </div>
+                </div>
+
+                <!-- Chat Input Box -->
+                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+                    <form onsubmit="app.handleChatSubmit(event)" class="flex items-end gap-2">
+                        <textarea 
+                            id="chatInputText" 
+                            rows="2" 
+                            placeholder="Ask a question about your study notes... (Press Enter to send, Shift+Enter for new line)"
+                            onkeydown="app.handleChatKeydown(event)"
+                            class="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none"
+                        ></textarea>
+                        <button type="submit" id="btnSendChat" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition-all flex items-center justify-center h-[52px]">
+                            <i data-lucide="send" class="w-4 h-4 mr-1"></i> Send
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- VIEW 5: QUIZZES & FLASHCARDS -->
+            <section id="view-quiz" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">Quiz & Spaced Repetition Flashcards</h1>
+                        <p class="text-xs text-slate-500">Test your mastery of the material with instant feedback and 3D flip cards.</p>
+                    </div>
+
+                    <!-- Mode Toggle: MCQ Quiz vs True/False vs Flashcards -->
+                    <div class="inline-flex p-1 bg-slate-200 rounded-xl text-xs font-semibold">
+                        <button onclick="app.setQuizMode('mcq')" id="btnQuizModeMcq" class="px-3.5 py-1.5 rounded-lg bg-white text-purple-700 shadow-xs transition-all">
+                            MCQ Quiz (4 Choices)
+                        </button>
+                        <button onclick="app.setQuizMode('true_false')" id="btnQuizModeTf" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+                            True / False
+                        </button>
+                        <button onclick="app.setQuizMode('flashcards')" id="btnQuizModeFlashcards" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+                            3D Flashcards
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Convert PDF into Quiz Configuration Wizard -->
+                <div class="bg-gradient-to-br from-purple-50/70 via-white to-indigo-50/60 p-5 rounded-2xl border border-purple-200/80 shadow-xs space-y-4">
+                    <div class="flex items-center justify-between border-b border-purple-100 pb-3">
+                        <div class="flex items-center space-x-2 text-xs font-bold text-slate-800">
+                            <span class="w-6 h-6 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs font-extrabold">1</span>
+                            <span>Convert Document into Interactive Quiz</span>
+                        </div>
+                        <div class="text-xs text-purple-700 font-semibold flex items-center bg-purple-100/60 px-2.5 py-1 rounded-lg">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5 mr-1.5 text-purple-600"></i>
+                            <span id="quizSourceDocLabel">Active Document: No doc selected</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <!-- Question Count -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center">
+                                <i data-lucide="list-ordered" class="w-3.5 h-3.5 mr-1 text-purple-600"></i> Number of Questions
+                            </label>
+                            <select id="quizCountSelect" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-purple-500 focus:outline-none shadow-2xs">
+                                <option value="5" selected>⚡ 5 Questions (Quick Check)</option>
+                                <option value="8">📝 8 Questions (Standard Test)</option>
+                                <option value="12">🎓 12 Questions (Comprehensive Exam)</option>
+                            </select>
+                        </div>
+
+                        <!-- Difficulty Level -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center">
+                                <i data-lucide="gauge" class="w-3.5 h-3.5 mr-1 text-purple-600"></i> Difficulty Level
+                            </label>
+                            <select id="quizDifficultySelect" class="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-purple-500 focus:outline-none shadow-2xs">
+                                <option value="easy">🟢 Conceptual & Foundational</option>
+                                <option value="medium" selected>🟡 University Exam Level</option>
+                                <option value="hard">🔴 Advanced Mastery & Tricky Proofs</option>
+                            </select>
+                        </div>
+
+                        <!-- Action trigger -->
+                        <div class="flex items-end">
+                            <button onclick="app.convertActivePdfToQuiz()" id="btnGenerateQuiz" class="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-md shadow-purple-500/20 flex items-center justify-center">
+                                <i data-lucide="sparkles" class="w-4 h-4 mr-2"></i> Convert PDF into Quiz Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Mode Content -->
+                <div id="quizContainerMcq" class="space-y-4">
+                    <!-- Populated dynamically with questions -->
+                    <div class="bg-white p-12 text-center rounded-xl border border-slate-200 text-slate-400">
+                        <i data-lucide="brain-circuit" class="w-12 h-12 mx-auto mb-3 text-slate-300"></i>
+                        <p class="text-sm font-bold text-slate-700">Ready to test your knowledge?</p>
+                        <p class="text-xs text-slate-400 mt-1">Click 'Generate Practice Material' to create questions from your notes.</p>
+                    </div>
+                </div>
+
+                <!-- Flashcard Mode Content -->
+                <div id="quizContainerFlashcards" class="hidden space-y-4">
+                    <!-- Flashcard 3D Card Area -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-full max-w-xl h-80 perspective-1000 my-4">
+                            <div id="activeFlashcard" onclick="app.flipFlashcard()" class="flashcard-inner shadow-md hover:shadow-lg rounded-2xl">
+                                <div class="flashcard-front">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-2">Term / Concept</span>
+                                    <h3 id="cardFrontText" class="text-lg sm:text-xl font-bold text-slate-800 text-center">
+                                        Click 'Generate Practice Material' to start
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400 mt-4 flex items-center">
+                                        <i data-lucide="rotate-cw" class="w-3.5 h-3.5 mr-1"></i> Click anywhere to flip
+                                    </p>
+                                </div>
+                                <div class="flashcard-back">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Definition & Context</span>
+                                    <p id="cardBackText" class="text-sm sm:text-base text-slate-700 text-center leading-relaxed">
+                                        Explanation will appear on the reverse side.
+                                    </p>
+                                    <span id="cardPageBadge" class="mt-4 text-[11px] font-semibold text-brand-700 bg-white/80 px-2.5 py-1 rounded-full border border-blue-200">
+                                        Page Reference
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flashcard Controls -->
+                        <div class="flex items-center space-x-4 mt-2">
+                            <button onclick="app.prevFlashcard()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold shadow-xs flex items-center">
+                                <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Prev
+                            </button>
+                            <span id="flashcardCounter" class="text-xs font-bold text-slate-600">Card 0 of 0</span>
+                            <button onclick="app.nextFlashcard()" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold shadow-xs flex items-center">
+                                Next <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 6: REVISION NOTES & BOOKMARKS -->
+            <section id="view-notes" class="space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">Saved Revision Notes</h1>
+                        <p class="text-xs text-slate-500">Your curated collection of cheat sheets, chapter highlights, and personal notes.</p>
+                    </div>
+                    <button onclick="app.openNewNoteModal()" class="px-3.5 py-2 text-xs font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition-all shadow-xs flex items-center">
+                        <i data-lucide="plus" class="w-3.5 h-3.5 mr-1.5"></i> New Custom Note
+                    </button>
+                </div>
+
+                <!-- Notes List / Grid -->
+                <div id="savedNotesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: AUTHENTICATION (Login / Sign Up) -->
+    <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold text-sm">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                    </div>
+                    <h3 id="authModalTitle" class="text-base font-bold text-slate-900">Sign in to your Study Account</h3>
+                </div>
+                <button onclick="app.closeAuthModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Tab Switcher (Login vs Sign Up) -->
+            <div class="flex border-b border-slate-200 my-4 text-xs font-bold">
+                <button onclick="app.setAuthTab('login')" id="authTabLogin" class="flex-1 py-2 text-brand-600 border-b-2 border-brand-600">Sign In</button>
+                <button onclick="app.setAuthTab('register')" id="authTabRegister" class="flex-1 py-2 text-slate-400 hover:text-slate-600">Create Account</button>
+            </div>
+
+            <form onsubmit="app.handleAuthSubmit(event)" class="space-y-3.5">
+                <div id="authUsernameField" class="hidden">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
+                    <input type="text" id="authInputUsername" placeholder="e.g. AlexStudent" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+                    <input type="email" id="authInputEmail" required placeholder="alex@university.edu" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="authInputPassword" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div id="authErrorMessage" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200"></div>
+
+                <button type="submit" id="authSubmitBtn" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-lg transition-all shadow-xs">
+                    Sign In
+                </button>
+
+                <div class="pt-2 text-center">
+                    <button type="button" onclick="app.loginDemoGuest()" class="text-xs text-brand-600 hover:text-brand-800 font-semibold">
+                        ⚡ Or continue as Demo Student in 1-click
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: AI SETTINGS (API Key & Provider Config) -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                        <i data-lucide="cpu" class="w-4 h-4"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">AI Engine & Model Configuration</h3>
+                </div>
+                <button onclick="app.closeSettingsModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="app.handleSettingsSubmit(event)" class="space-y-4 my-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Select AI Engine</label>
+                    <select id="settingsAiProvider" onchange="app.toggleSettingsKeyFields()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        <option value="builtin">⚡ Built-in Smart Semantic Engine (Offline, Fast & Free)</option>
+                        <option value="gemini">✨ Google Gemini API (Gemini 2.0 Flash / Pro)</option>
+                        <option value="openai">🤖 OpenAI API (GPT-4o Mini)</option>
+                    </select>
+                    <p class="text-[11px] text-slate-500 mt-1">The built-in engine requires zero external keys and runs entirely locally!</p>
+                </div>
+
+                <div id="settingsGeminiGroup" class="hidden">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Google Gemini API Key</label>
+                    <input type="password" id="settingsGeminiKey" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div id="settingsOpenAiGroup" class="hidden">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">OpenAI API Key</label>
+                    <input type="password" id="settingsOpenAiKey" placeholder="sk-..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="app.closeSettingsModal()" class="px-4 py-2 border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg shadow-xs">
+                        Save Preferences
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: DOCUMENT READER / EXTRACTED PAGES PREVIEW -->
+    <div id="readerModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full h-[85vh] p-6 shadow-2xl border border-slate-200 flex flex-col relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 flex-shrink-0">
+                <div>
+                    <h3 id="readerDocTitle" class="text-base font-bold text-slate-900">Document Reader</h3>
+                    <p id="readerDocMeta" class="text-xs text-slate-500">Extracted Page-by-Page View</p>
+                </div>
+                <button onclick="app.closeReaderModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="readerPagesContainer" class="flex-1 overflow-y-auto py-4 space-y-6">
+                <!-- Pages injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: NEW CUSTOM REVISION NOTE -->
+    <div id="newNoteModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Create New Revision Note</h3>
+                <button onclick="app.closeNewNoteModal()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="app.handleNewNoteSubmit(event)" class="space-y-4 my-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Note Title</label>
+                    <input type="text" id="newNoteTitle" required placeholder="e.g. Midterm Cheat Sheet - Chapter 3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Content (Markdown supported)</label>
+                    <textarea id="newNoteContent" rows="6" required placeholder="Write or paste your key formulas, mnemonics, and definitions..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500 focus:outline-none font-mono"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="app.closeNewNoteModal()" class="px-4 py-2 border border-slate-200 text-xs font-bold text-slate-600 rounded-lg hover:bg-slate-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg shadow-xs">
+                        Save Note
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- Application Logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
