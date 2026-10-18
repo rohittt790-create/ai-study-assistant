@@ -10,8 +10,17 @@ from pdf_service import validate_pdf_file, extract_pdf_data
 from sample_data import create_sample_ai_pdf
 
 router = APIRouter(prefix="/api/documents", tags=["Documents"])
-UPLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
-os.makedirs(UPLOADS_DIR, exist_ok=True)
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+if IS_SERVERLESS:
+    UPLOADS_DIR = "/tmp/study_assistant_uploads"
+else:
+    UPLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+
+try:
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+except Exception:
+    UPLOADS_DIR = "/tmp/study_assistant_uploads"
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 @router.post("/upload")
 async def upload_document(

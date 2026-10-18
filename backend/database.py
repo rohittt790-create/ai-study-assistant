@@ -11,8 +11,18 @@ logger = logging.getLogger("study_assistant.database")
 # ==========================================
 # CONFIGURATION & PATHS
 # ==========================================
-DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
-os.makedirs(DB_DIR, exist_ok=True)
+IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+if IS_SERVERLESS:
+    DB_DIR = "/tmp/study_assistant_data"
+else:
+    DB_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+
+try:
+    os.makedirs(DB_DIR, exist_ok=True)
+except Exception:
+    DB_DIR = "/tmp/study_assistant_data"
+    os.makedirs(DB_DIR, exist_ok=True)
+
 DB_PATH = os.path.join(DB_DIR, "study_assistant.db")
 
 MONGO_URI = os.environ.get("MONGO_URI", "").strip()

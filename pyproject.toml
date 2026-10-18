@@ -1,0 +1,22 @@
+[project]
+name = "ai-study-assistant"
+version = "1.0.0"
+description = "AI-powered Study Assistant Web Application"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "pypdf>=5.0.0",
+    "python-multipart>=0.0.9",
+    "pyjwt>=2.8.0",
+    "passlib>=1.7.4",
+    "requests>=2.31.0",
+    "reportlab>=4.0.0",
+    "Pillow>=10.0.0",
+    "pymongo>=4.0.0",
+    "dnspython>=2.0.0"
+]
+
+[tool.vercel]
+entrypoint = "backend.app:app"
