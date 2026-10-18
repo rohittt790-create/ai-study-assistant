@@ -165,8 +165,8 @@
 
             <!-- VIEW 1: DASHBOARD -->
             <section id="view-dashboard" class="space-y-6">
-                <!-- Welcome Aurora Hero Banner -->
-                <div class="p-7 sm:p-9 rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white shadow-2xl relative overflow-hidden border border-white/10">
+                <!-- Welcome Aurora Hero Banner (Frosted Glass) -->
+                <div class="p-7 sm:p-9 rounded-3xl bg-gradient-to-r from-slate-950/80 via-indigo-950/75 to-purple-950/80 backdrop-blur-md text-white shadow-2xl relative overflow-hidden border border-white/20">
                     <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         <div class="max-w-2xl">
                             <div class="flex flex-wrap items-center gap-2 mb-3.5">
@@ -195,29 +195,29 @@
 
                         <!-- Floating Feature Preview Chips -->
                         <div class="hidden lg:grid grid-cols-2 gap-2.5 min-w-[280px]">
-                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                            <div class="p-3 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
                                 <div class="text-[11px] font-bold text-indigo-300 flex items-center mb-1">
                                     <i data-lucide="file-check" class="w-3.5 h-3.5 mr-1 text-emerald-400"></i> Instant RAG
                                 </div>
-                                <div class="text-[11px] text-slate-300">Page-accurate citations</div>
+                                <div class="text-[11px] text-slate-200">Page-accurate citations</div>
                             </div>
-                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                            <div class="p-3 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
                                 <div class="text-[11px] font-bold text-purple-300 flex items-center mb-1">
                                     <i data-lucide="brain-circuit" class="w-3.5 h-3.5 mr-1 text-purple-400"></i> PDF to Quiz
                                 </div>
-                                <div class="text-[11px] text-slate-300">MCQ & 3D Flashcards</div>
+                                <div class="text-[11px] text-slate-200">MCQ & 3D Flashcards</div>
                             </div>
-                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                            <div class="p-3 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
                                 <div class="text-[11px] font-bold text-amber-300 flex items-center mb-1">
                                     <i data-lucide="bookmark" class="w-3.5 h-3.5 mr-1 text-amber-400"></i> Revision Notes
                                 </div>
-                                <div class="text-[11px] text-slate-300">Chapter cheat sheets</div>
+                                <div class="text-[11px] text-slate-200">Chapter cheat sheets</div>
                             </div>
-                            <div class="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
+                            <div class="p-3 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
                                 <div class="text-[11px] font-bold text-emerald-300 flex items-center mb-1">
                                     <i data-lucide="database" class="w-3.5 h-3.5 mr-1 text-emerald-400"></i> MongoDB Cloud
                                 </div>
-                                <div class="text-[11px] text-slate-300">Sync across sessions</div>
+                                <div class="text-[11px] text-slate-200">Sync across sessions</div>
                             </div>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
 
                 <!-- Metrics Overview Cards (Decorative) -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="card-decorative bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-blue-300 transition-all">
+                    <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-blue-300 transition-all">
                         <div class="flex items-center justify-between text-slate-500 mb-2.5">
                             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Documents</span>
                             <div class="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-500/25">
@@ -242,7 +242,7 @@
                         </div>
                     </div>
 
-                    <div class="card-decorative bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all">
+                    <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-emerald-300 transition-all">
                         <div class="flex items-center justify-between text-slate-500 mb-2.5">
                             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Revision Notes</span>
                             <div class="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm shadow-emerald-500/25">
@@ -255,7 +255,7 @@
                         </div>
                     </div>
 
-                    <div class="card-decorative bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-purple-300 transition-all">
+                    <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-purple-300 transition-all">
                         <div class="flex items-center justify-between text-slate-500 mb-2.5">
                             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Quizzes Taken</span>
                             <div class="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-sm shadow-purple-500/25">
@@ -268,7 +268,7 @@
                         </div>
                     </div>
 
-                    <div class="card-decorative bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all">
+                    <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all">
                         <div class="flex items-center justify-between text-slate-500 mb-2.5">
                             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Average Score</span>
                             <div class="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-sm shadow-amber-500/25">
@@ -285,10 +285,11 @@
                 <!-- Quick Action Tools Grid -->
                 <div>
                     <div class="flex items-center justify-between mb-3.5">
-                        <h2 class="text-sm sm:text-base font-extrabold text-slate-900 flex items-center tracking-tight">
-                            <span class="w-2 h-2 rounded-full bg-brand-600 mr-2"></span> What would you like to study today?
-                        </h2>
-                        <span class="text-[11px] font-semibold text-slate-400">Select any module</span>
+                        <div class="inline-flex items-center bg-white/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/80 shadow-2xs">
+                            <span class="w-2 h-2 rounded-full bg-brand-600 mr-2"></span>
+                            <h2 class="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight">What would you like to study today?</h2>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-700 bg-white/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/70 shadow-2xs">Select any module</span>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div onclick="app.quickAction('summary')" class="action-card card-decorative bg-white/95 backdrop-blur-sm p-5 sm:p-6 rounded-2xl border border-slate-200/80 hover:border-brand-300 cursor-pointer group">
@@ -367,16 +368,16 @@
 
             <!-- VIEW 2: DOCUMENTS & UPLOAD -->
             <section id="view-documents" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <div class="flex items-center space-x-2 mb-1">
                             <span class="w-2 h-2 rounded-full bg-brand-600"></span>
                             <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Study Materials Library</h1>
                         </div>
-                        <p class="text-xs text-slate-500">Upload your PDF textbooks, lecture slides, and notes for instant AI extraction.</p>
+                        <p class="text-xs text-slate-600">Upload your PDF textbooks, lecture slides, and notes for instant AI extraction.</p>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="app.loadSampleNotes()" class="px-3.5 py-2 text-xs font-bold text-brand-700 bg-brand-50 border border-brand-200 hover:bg-brand-100 rounded-xl transition-all shadow-2xs flex items-center hover:scale-[1.02] active:scale-[0.98]">
+                        <button onclick="app.loadSampleNotes()" class="px-3.5 py-2 text-xs font-bold text-brand-700 bg-white/90 border border-brand-200 hover:bg-brand-50 rounded-xl transition-all shadow-2xs flex items-center hover:scale-[1.02] active:scale-[0.98]">
                             <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-amber-500"></i> Add Sample AI Lecture Notes
                         </button>
                     </div>
@@ -437,13 +438,13 @@
 
             <!-- VIEW 3: AI SUMMARIZER & REVISION NOTES -->
             <section id="view-summary" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <div class="flex items-center space-x-2 mb-1">
                             <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
                             <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">AI Notes Summarizer</h1>
                         </div>
-                        <p class="text-xs text-slate-500">Transform dense chapters into structured revision notes, bullet takeaways, and glossary lists.</p>
+                        <p class="text-xs text-slate-600">Transform dense chapters into structured revision notes, bullet takeaways, and glossary lists.</p>
                     </div>
                     <div class="flex items-center space-x-2">
                         <button onclick="app.copySummaryToClipboard()" class="px-3 py-1.5 text-xs font-bold text-slate-700 bg-white/90 border border-slate-200 hover:bg-slate-50 rounded-xl transition-all shadow-2xs flex items-center">
@@ -582,17 +583,17 @@
 
             <!-- VIEW 5: QUIZZES & FLASHCARDS -->
             <section id="view-quiz" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <div class="flex items-center space-x-2 mb-1">
                             <span class="w-2 h-2 rounded-full bg-purple-600"></span>
                             <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Quiz & Spaced Repetition Flashcards</h1>
                         </div>
-                        <p class="text-xs text-slate-500">Test your mastery of the material with instant feedback and 3D flip cards.</p>
+                        <p class="text-xs text-slate-600">Test your mastery of the material with instant feedback and 3D flip cards.</p>
                     </div>
 
                     <!-- Mode Toggle: MCQ Quiz vs True/False vs Flashcards -->
-                    <div class="inline-flex p-1 bg-slate-200/70 backdrop-blur-xs rounded-2xl text-xs font-bold border border-slate-300/40 shadow-inner">
+                    <div class="inline-flex p-1 bg-white/70 backdrop-blur-xs rounded-2xl text-xs font-bold border border-white/80 shadow-2xs">
                         <button onclick="app.setQuizMode('mcq')" id="btnQuizModeMcq" class="px-4 py-1.5 rounded-xl bg-white text-purple-700 shadow-xs transition-all">
                             MCQ Quiz (4 Choices)
                         </button>
@@ -705,13 +706,13 @@
 
             <!-- VIEW 6: REVISION NOTES & BOOKMARKS -->
             <section id="view-notes" class="space-y-6 hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="card-decorative p-4 sm:p-5 rounded-2xl border border-white/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <div class="flex items-center space-x-2 mb-1">
                             <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
                             <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Saved Revision Notes</h1>
                         </div>
-                        <p class="text-xs text-slate-500">Your curated collection of cheat sheets, chapter highlights, and personal exam notes.</p>
+                        <p class="text-xs text-slate-600">Your curated collection of cheat sheets, chapter highlights, and personal exam notes.</p>
                     </div>
                     <button onclick="app.openNewNoteModal()" class="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center hover:scale-[1.02] active:scale-[0.98]">
                         <i data-lucide="plus" class="w-3.5 h-3.5 mr-1.5"></i> New Custom Note
