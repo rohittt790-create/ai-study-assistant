@@ -528,10 +528,12 @@ class StudyApp {
 
         if (this.documents.length === 0) {
             container.innerHTML = `
-                <div class="py-12 text-center text-slate-400">
-                    <i data-lucide="folder-open" class="w-10 h-10 mx-auto mb-2 text-slate-300"></i>
-                    <p class="text-sm font-semibold text-slate-600">No documents uploaded yet</p>
-                    <p class="text-xs text-slate-400 mt-1">Upload a PDF above or click 'Add Sample AI Lecture Notes'.</p>
+                <div class="py-14 text-center text-slate-400">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-400 flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="folder-open" class="w-7 h-7"></i>
+                    </div>
+                    <p class="text-sm font-bold text-slate-700">No documents uploaded yet</p>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Upload a PDF textbook or slides above, or click 'Add Sample AI Lecture Notes'.</p>
                 </div>
             `;
             if (window.lucide) lucide.createIcons();
@@ -544,38 +546,38 @@ class StudyApp {
             const readMins = Math.max(1, Math.round((doc.word_count || 500) / 200));
 
             return `
-                <div class="p-4 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isActive ? 'bg-brand-50/40' : ''}">
-                    <div class="flex items-start space-x-3 min-w-0">
-                        <div class="p-2.5 rounded-xl ${isActive ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600'} flex-shrink-0">
+                <div class="p-4 sm:p-5 hover:bg-slate-50/90 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${isActive ? 'bg-gradient-to-r from-brand-50/60 to-indigo-50/40 border-l-4 border-l-brand-600' : ''}">
+                    <div class="flex items-start space-x-3.5 min-w-0">
+                        <div class="p-3 rounded-2xl ${isActive ? 'bg-gradient-to-br from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-500/25' : 'bg-slate-100 text-slate-600'} flex-shrink-0">
                             <i data-lucide="file-text" class="w-5 h-5"></i>
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center space-x-2">
-                                <h4 class="text-sm font-bold text-slate-900 truncate">${doc.title}</h4>
-                                ${isActive ? '<span class="text-[10px] font-bold uppercase tracking-wider bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full">Active</span>' : ''}
+                                <h4 class="text-sm font-extrabold text-slate-900 truncate">${doc.title}</h4>
+                                ${isActive ? '<span class="text-[10px] font-extrabold uppercase tracking-wider bg-brand-100 text-brand-700 px-2.5 py-0.5 rounded-full border border-brand-200">Active</span>' : ''}
                             </div>
-                            <div class="flex items-center space-x-3 text-xs text-slate-500 mt-1">
-                                <span><i data-lucide="book-open" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i>${doc.page_count} Pages</span>
-                                <span>•</span>
-                                <span><i data-lucide="clock" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i>~${readMins} min read</span>
-                                <span>•</span>
-                                <span>${fileSizeKb} KB</span>
+                            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-slate-500 mt-1.5">
+                                <span class="inline-flex items-center font-medium"><i data-lucide="book-open" class="w-3.5 h-3.5 mr-1 text-brand-500"></i>${doc.page_count} Pages</span>
+                                <span class="text-slate-300">•</span>
+                                <span class="inline-flex items-center font-medium"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-indigo-500"></i>~${readMins} min read</span>
+                                <span class="text-slate-300">•</span>
+                                <span class="font-medium text-slate-400">${fileSizeKb} KB</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2 self-end sm:self-center">
-                        <button onclick="app.convertDocToQuiz(${doc.id})" class="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold rounded-lg transition-colors flex items-center shadow-2xs" title="Convert PDF into Quiz">
-                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1 text-purple-600"></i> Quiz
+                    <div class="flex items-center space-x-2 self-end sm:self-center flex-shrink-0">
+                        <button onclick="app.convertDocToQuiz(${doc.id})" class="px-3.5 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 text-purple-700 border border-purple-200/80 text-xs font-bold rounded-xl transition-all flex items-center shadow-2xs hover:scale-[1.02]" title="Convert PDF into Quiz">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-purple-600"></i> Quiz
                         </button>
                         ${!isActive ? `
-                            <button onclick="app.switchActiveDocument(${doc.id})" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold rounded-lg transition-colors">
+                            <button onclick="app.switchActiveDocument(${doc.id})" class="px-3.5 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold rounded-xl transition-all shadow-2xs hover:scale-[1.02]">
                                 Select
                             </button>
                         ` : ''}
-                        <button onclick="app.openReaderModal(${doc.id})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors flex items-center">
-                            <i data-lucide="eye" class="w-3.5 h-3.5 mr-1"></i> Read Text
+                        <button onclick="app.openReaderModal(${doc.id})" class="px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition-all shadow-2xs flex items-center">
+                            <i data-lucide="eye" class="w-3.5 h-3.5 mr-1.5 text-slate-500"></i> View
                         </button>
-                        <button onclick="app.deleteDocument(${doc.id})" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg transition-colors" title="Delete Document">
+                        <button onclick="app.deleteDocument(${doc.id})" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors" title="Delete Document">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -592,8 +594,8 @@ class StudyApp {
 
         if (this.documents.length === 0) {
             list.innerHTML = `
-                <div class="py-6 text-center text-slate-400 text-xs">
-                    No study documents added yet.
+                <div class="py-8 text-center text-slate-400 text-xs">
+                    No study documents added yet. Upload a PDF or click 'Quick Start with Sample Notes'.
                 </div>
             `;
             return;
@@ -602,18 +604,18 @@ class StudyApp {
         list.innerHTML = this.documents.slice(0, 4).map(doc => {
             const isActive = doc.id === this.activeDocId;
             return `
-                <div class="py-3 flex items-center justify-between">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <div class="p-2 rounded-lg ${isActive ? 'bg-brand-100 text-brand-700' : 'bg-slate-100 text-slate-500'}">
-                            <i data-lucide="file" class="w-4 h-4"></i>
+                <div class="py-3.5 flex items-center justify-between hover:bg-slate-50/70 px-2 rounded-xl transition-colors">
+                    <div class="flex items-center space-x-3.5 min-w-0">
+                        <div class="p-2.5 rounded-xl ${isActive ? 'bg-gradient-to-br from-brand-500 to-indigo-600 text-white shadow-sm shadow-brand-500/25' : 'bg-slate-100 text-slate-500'}">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-xs font-bold text-slate-800 truncate">${doc.title}</p>
-                            <p class="text-[11px] text-slate-400">${doc.page_count} pages • Uploaded ${doc.created_at || 'recently'}</p>
+                            <p class="text-xs font-bold text-slate-900 truncate">${doc.title}</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">${doc.page_count} pages • ~${Math.max(1, Math.round((doc.word_count || 500) / 200))} min read</p>
                         </div>
                     </div>
-                    <button onclick="app.switchActiveDocument(${doc.id})" class="text-xs font-semibold ${isActive ? 'text-brand-600' : 'text-slate-500 hover:text-brand-600'}">
-                        ${isActive ? 'Active' : 'Study This'}
+                    <button onclick="app.switchActiveDocument(${doc.id})" class="text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${isActive ? 'bg-brand-50 text-brand-700 border border-brand-200' : 'text-slate-600 hover:text-brand-700 hover:bg-slate-100'}">
+                        ${isActive ? '✓ Active' : 'Study This'}
                     </button>
                 </div>
             `;
@@ -812,14 +814,14 @@ class StudyApp {
 
             if (!isUser && msg.citations && msg.citations.length > 0) {
                 citationsHtml = `
-                    <div class="mt-3 pt-2.5 border-t border-slate-200/80">
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-brand-600 mb-1.5 flex items-center">
-                            <i data-lucide="bookmark" class="w-3 h-3 mr-1"></i> Document Citations
+                    <div class="mt-3.5 pt-3 border-t border-slate-100">
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600 mb-2 flex items-center">
+                            <i data-lucide="bookmark" class="w-3 h-3 mr-1"></i> Document Page Citations
                         </div>
-                        <div class="flex flex-wrap gap-1.5">
+                        <div class="flex flex-wrap gap-2">
                             ${msg.citations.map(c => `
-                                <span class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-md bg-white border border-brand-200 text-brand-800 shadow-2xs" title="${c.snippet}">
-                                    <i data-lucide="file-text" class="w-3 h-3 mr-1 text-brand-500"></i> Page ${c.page}
+                                <span class="inline-flex items-center text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-800 shadow-2xs hover:bg-indigo-100 transition-colors" title="${c.snippet}">
+                                    <i data-lucide="file-text" class="w-3 h-3 mr-1 text-indigo-500"></i> Page ${c.page}
                                 </span>
                             `).join("")}
                         </div>
@@ -829,10 +831,10 @@ class StudyApp {
 
             return `
                 <div class="flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}">
-                    <div class="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold ${isUser ? 'bg-brand-600 text-white' : 'bg-indigo-600 text-white'}">
+                    <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold ${isUser ? 'bg-gradient-to-tr from-brand-600 to-indigo-600 text-white shadow-sm shadow-brand-500/25' : 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-500/25'}">
                         ${isUser ? 'You' : '<i data-lucide="bot" class="w-4 h-4"></i>'}
                     </div>
-                    <div class="max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed ${isUser ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-800'}">
+                    <div class="max-w-[85%] ${isUser ? 'bg-gradient-to-r from-brand-600 via-indigo-600 to-indigo-700 text-white rounded-2xl rounded-tr-xs shadow-md shadow-brand-500/15' : 'card-decorative bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-2xl rounded-tl-xs shadow-xs text-slate-800'} p-4 text-xs leading-relaxed">
                         <div class="markdown-body ${isUser ? 'text-white' : ''}">
                             ${marked.parse(msg.content)}
                         </div>
@@ -879,8 +881,8 @@ class StudyApp {
         const userBubble = document.createElement("div");
         userBubble.className = "flex items-start space-x-3 flex-row-reverse space-x-reverse";
         userBubble.innerHTML = `
-            <div class="w-7 h-7 rounded-lg bg-brand-600 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">You</div>
-            <div class="max-w-[85%] rounded-2xl p-3.5 text-xs leading-relaxed bg-brand-600 text-white">${query}</div>
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold shadow-sm shadow-brand-500/25">You</div>
+            <div class="max-w-[85%] rounded-2xl rounded-tr-xs p-4 text-xs leading-relaxed bg-gradient-to-r from-brand-600 via-indigo-600 to-indigo-700 text-white shadow-md shadow-brand-500/15">${query}</div>
         `;
         stream.appendChild(userBubble);
 
@@ -889,12 +891,12 @@ class StudyApp {
         loadingBubble.id = "chatLoadingBubble";
         loadingBubble.className = "flex items-start space-x-3";
         loadingBubble.innerHTML = `
-            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center flex-shrink-0">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm shadow-indigo-500/25">
                 <i data-lucide="bot" class="w-4 h-4"></i>
             </div>
-            <div class="p-3.5 bg-slate-100 rounded-2xl text-xs text-slate-500 flex items-center space-x-2">
-                <div class="w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
-                <span>Searching document pages for answers...</span>
+            <div class="card-decorative p-4 bg-white/95 backdrop-blur-sm border border-slate-200/80 rounded-2xl rounded-tl-xs text-xs text-slate-600 flex items-center space-x-2.5 shadow-xs">
+                <div class="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                <span class="font-medium">Searching notes and generating answer with Gemini 3.8 Flash...</span>
             </div>
         `;
         stream.appendChild(loadingBubble);
@@ -1420,9 +1422,18 @@ class StudyApp {
             }
             if (nav) {
                 if (v === view) {
-                    nav.className = "nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-150 text-brand-700 bg-brand-50 border border-brand-200";
+                    nav.className = "nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-extrabold rounded-xl transition-all duration-150 text-brand-700 bg-white shadow-md shadow-brand-500/10 border border-brand-200";
                 } else {
-                    nav.className = "nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-150 text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+                    nav.className = "nav-tab w-full flex items-center space-x-3 px-3.5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-150 text-slate-700 hover:text-slate-900";
+                }
+            }
+
+            const mob = document.querySelector(`button.mobile-tab[onclick*="'${v}'"]`);
+            if (mob) {
+                if (v === view) {
+                    mob.className = "mobile-tab px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap bg-white text-brand-700 border border-brand-200 shadow-xs";
+                } else {
+                    mob.className = "mobile-tab px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap text-slate-700 hover:bg-white/80";
                 }
             }
         });
